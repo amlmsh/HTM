@@ -30,6 +30,10 @@ test:	Test_HTM
 
 obj:    HTM.o
 
+run:	Test_HTM
+	./Test_HTM
+
 
 clean:
 	rm *.o Test_HTM
+	
