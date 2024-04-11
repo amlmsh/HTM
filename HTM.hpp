@@ -27,6 +27,7 @@ public:
     virtual float getTransX() = 0;
     virtual float getTransY() = 0;
     virtual float getTransZ() = 0;
+
 };
 
 
@@ -81,5 +82,8 @@ public:
 protected:
 	cv::Mat createMatrix(float angle, float x, float y, float z);
 };
+
+IHTM *factory(char mType, float angle, float x, float y, float z);
+
 
 #endif // HTM_HPP_INCLUDED

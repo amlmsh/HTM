@@ -32,6 +32,10 @@ obj:    HTM.o
 
 run:	Test_HTM
 	./Test_HTM
+	
+	
+doc:	
+	doxygen
 
 
 clean:

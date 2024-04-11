@@ -3,6 +3,16 @@
 #include <string>
 
 
+IHTM *factory(char mType, float angle, float x, float y, float z){
+	IHTM *m;
+	switch(mType){
+		case 'X': m = new HTM3dTransRotX(angle, x,y,z); break;
+		case 'Y': m = new HTM3dTransRotY(angle, x,y,z); break;
+		case 'Z': m = new HTM3dTransRotZ(angle, x,y,z); break;
+		default:  m = new HTM3dTransRotX(0,0,0,0);
+	}
+	return m;
+}
 
 
 
