@@ -39,5 +39,5 @@ doc:
 
 
 clean:
-	rm *.o Test_HTM
+	rm -rf DOXYGENDOC *.o Test_HTM 
 	

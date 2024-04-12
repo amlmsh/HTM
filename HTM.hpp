@@ -1,6 +1,41 @@
 #ifndef HTM_HPP_INCLUDED
 #define HTM_HPP_INCLUDED
 
+/**
+ *
+ * \mainpage HTM (Homogeneous Transformation Matrixes for Robotic Manipulators)
+ *
+ * \author Martin Huelse (c) 2024
+ *
+ * HSBI (email: martin.huelse@hsbi.de)
+ *
+ * \section  Introduction
+ * An C++ object oriented framework is provided
+ * that shall help to build up forward kinematics
+ * for 3D kinematic chains.
+ * The transformation matrixes include rotation and
+ * translation only.
+ *
+ * The matrix implementation makes use of the openCV
+ * data structure 'Mat', algorithms, graphics and GUI
+ * elements are also based on openCV libraries.
+ *
+ */
+
+
+/**
+ *
+ * \file HTM.hpp
+ *
+ * \brief Contains class declarations for
+ * homogeneous transformation matrixes implementation.
+ *
+ *
+ *
+ */
+
+
+
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -9,23 +44,102 @@
  * \class IHTM
  *
  * \brief Interface for a 4x4 HTM with 1 x rotation
- * (either rotation axis X, Y or Z) and translation
- * parameter (x,y and z).
+ * (either rotation axis X, Y or Z) and 1 x translation
+ * parameters (x,y and z).
  *
  *
  */
 class IHTM{
 public:
+
+	/**
+	 *
+	 *  The HTM based on the new rotation angle is
+	 *  calculated and returned.
+	 *	@param v given in rad (angle value)
+	 *  \return cv::Mat (openCV data structure for representing HTM-matrix)
+	 *
+	 */
     virtual cv::Mat updateAngRot(float v) = 0;
+
+    /**
+	 *
+	 *  The HTM is calculated and returned. The calculation is based
+	 *  on the new x-component value of the 3D
+	 *  translation vector.
+	 *	@param v given in unit
+	 *  \return cv::Mat (openCV data structure for representing HTM-matrix)
+	 *
+	 */
     virtual cv::Mat updateTransX(float v) = 0;
+
+
+    /**
+	 *
+	 *  The HTM is calculated and returned. The calculation is based
+	 *  on the new y-component value of the 3D
+	 *  translation vector.
+	 *	@param v given in unit
+	 *  \return cv::Mat (openCV data structure for representing HTM-matrix)
+	 *
+	 */
     virtual cv::Mat updateTransY(float v) = 0;
+
+    /**
+	 *
+	 *  The HTM is calculated and returned. The calculation is based
+	 *  on the new z-component value of the 3D
+	 *  translation vector.
+	 *	@param v given in unit
+	 *  \return cv::Mat (openCV data structure for representing HTM-matrix)
+	 *
+	 */
     virtual cv::Mat updateTransZ(float v) = 0;
 
+    /**
+	 *
+	 *  The current HTM is returned.
+	 *  \return cv::Mat (openCV data structure for representing HTM-matrix)
+	 *
+	 */
     virtual cv::Mat current() = 0;
 
+    /**
+	 *
+	 *  Returns the rotation angle the current HTM is calculated with.
+	 *  Notice! Each HTM represents only one rotation. The rotation
+	 *  axis can either be the X-axis, Y-axis or Z-axis.
+	 *  \return float (rad) rotation angle.
+	 *
+	 */
     virtual float getRotAngle() = 0;
+
+
+    /**
+	 *
+	 *  Returns the x-component of the translation vector
+	 *  the current HTM is calculated with.
+	 *  \return float (unit) x-component of the translation.
+	 *
+	 */
     virtual float getTransX() = 0;
+
+    /**
+	 *
+	 *  Returns the x-component of the translation vector
+	 *  the current HTM is calculated with.
+	 *  \return float (unit) x-component of the translation.
+	 *
+	 */
     virtual float getTransY() = 0;
+
+    /**
+	 *
+	 *  Returns the x-component of the translation vector
+	 *  the current HTM is calculated with.
+	 *  \return float (unit) x-component of the translation.
+	 *
+	 */
     virtual float getTransZ() = 0;
 
 };
@@ -33,7 +147,14 @@ public:
 
 /**
  *
- * \class HTM3dTransRot abstract class
+ * \class HTM3dTransRot
+ *
+ *
+ * \brief Implements basic functionality of the HTM
+ * definition and calculations.
+ * It is an abstract class and needs to be used a
+ * parents class for implementing the HTMs for
+ * the rotation of either X-, Y- or Z-axis.
  *
  */
 class HTM3dTransRot : public IHTM{
@@ -52,34 +173,162 @@ public:
 
 
 protected:
+
+    /**
+     *
+     * \brief Data type from openCV representing a matrix
+     *
+     */
 	cv::Mat m_;
+
+	/**
+	 *
+	 * \brief parameter representing 1 x rotation(angle in rad) and
+	 * translation (x,y,z-components of the translation vector)
+	 *
+	 */
 	float angle_, transX_, transY_, transZ_;
+
+	/**
+	 *
+	 * \brief Calculation and storing the new HTM based on the given
+	 * parameters for rotation and translation.
+	 * For specific HTMs you must overwrite this methods in the
+	 * corresponding child class.
+	 *
+	 *
+	 * \p angle float angle (rad) of rotation
+	 * \p x float (unit) x-component of the translation vector
+	 * \p y float (unit) y-component of the translation vector
+	 * \p y float (unit) z-component of the translation vector
+	 * \return cv::Mat openCV data type representing the calculated HTM
+	 *
+	 */
 	virtual cv::Mat createMatrix(float angle, float x, float y, float z) = 0;
 };
 
-
+/**
+ *
+ * \class HTM3dTransRotX
+ *
+ * \brief Implements the HTM generation of 1 x translation
+ * and 1 x rotation, where the X-axis is the rotation axis.
+ *
+ */
 class HTM3dTransRotX : public HTM3dTransRot{
 public:
+
+	/**
+	 *
+	 * Constructor, parameterized
+	 *
+	 */
 	HTM3dTransRotX(float angle=0, float x = 0, float y = 0, float z = 0);
+
+	/**
+	 *
+	 * Destructor
+	 *
+	 */
 	~HTM3dTransRotX();
+
 protected:
+
+	/**
+	 *
+	 * \brief Calculation and storing the new HTM based on the given
+	 * parameters for rotation (rotation axis is X-axis) and translation.
+	 *
+	 * \p angle float angle (rad) of rotation
+	 * \p x float (unit) x-component of the translation vector
+	 * \p y float (unit) y-component of the translation vector
+	 * \p y float (unit) z-component of the translation vector
+	 * \return cv::Mat openCV data type representing the calculated HTM
+	 *
+	 */
 	cv::Mat createMatrix(float angle, float x, float y, float z);
 };
 
-
+/**
+ *
+ * \class HTM3dTransRotY
+ *
+ * \brief Implements the HTM generation of 1 x translation
+ * and 1 x rotation, where the Y-axis is the rotation axis.
+ *
+ */
 class HTM3dTransRotY : public HTM3dTransRotX{
 public:
+
+	/**
+	 *
+	 * Constructor, parameterized
+	 *
+	 */
 	HTM3dTransRotY(float angle=0, float x = 0, float y = 0, float z = 0);
+
+	/**
+	 *
+	 * Destructor
+	 *
+	 */
 	~HTM3dTransRotY();
 protected:
+
+	/**
+	 *
+	 * \brief Calculation and storing the new HTM based on the given
+	 * parameters for rotation (rotation axis is Y-axis) and translation.
+	 *
+	 * \p angle float angle (rad) of rotation
+	 * \p x float (unit) x-component of the translation vector
+	 * \p y float (unit) y-component of the translation vector
+	 * \p y float (unit) z-component of the translation vector
+	 * \return cv::Mat openCV data type representing the calculated HTM
+	 *
+	 */
 	cv::Mat createMatrix(float angle, float x, float y, float z);
 };
 
+
+/**
+ *
+ * \class HTM3dTransRotZ
+ *
+ * \brief Implements the HTM generation of 1 x translation
+ * and 1 x rotation, where the Z-axis is the rotation axis.
+ *
+ */
 class HTM3dTransRotZ : public HTM3dTransRotX{
 public:
+
+	/**
+	 *
+	 * Constructor, parameterized
+	 *
+	 */
 	HTM3dTransRotZ(float angle=0, float x = 0, float y = 0, float z = 0);
+
+	/**
+	 *
+	 * Destructor
+	 *
+	 */
 	~HTM3dTransRotZ();
 protected:
+
+	/**
+	 *
+	 * \brief Calculation and storing the new HTM based on the given
+	 * parameters for rotation (rotation axis is Z-axis) and translation.
+	 *
+	 * \p angle float angle (rad) of rotation
+	 * \p x float (unit) x-component of the translation vector
+	 * \p y float (unit) y-component of the translation vector
+	 * \p y float (unit) z-component of the translation vector
+	 * \return cv::Mat openCV data type representing the calculated HTM
+	 *
+	 */
 	cv::Mat createMatrix(float angle, float x, float y, float z);
 };
 
