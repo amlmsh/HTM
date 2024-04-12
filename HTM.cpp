@@ -128,3 +128,45 @@ cv::Mat HTM3dTransRotZ::createMatrix(float angle, float x, float y, float z){
 }
 
 
+cv::Mat HTM3dTransRotX::updateDHparam(float phi, float alpha, float a, float d){
+	std::string msg;
+	msg += std::string("DH-Parameter not supported in this class.");
+	throw msg;
+	return cv::Mat::eye(4,4,CV_32F);
+}
+
+
+HTM3dDH::HTM3dDH(){
+	this->m_ = cv::Mat::eye(4,4,CV_32F);
+}
+
+HTM3dDH::~HTM3dDH(){
+	return;
+}
+
+cv::Mat HTM3dDH::current(){
+	return this->m_;
+}
+
+cv::Mat HTM3dDH::updateDHparam(float phi, float alpha, float a, float d){
+	this->m_ = cv::Mat::eye(4,4,CV_32F);
+	this->m_.at<float>(0,0) =  cos(phi);
+	this->m_.at<float>(0,1) = -sin(phi)*cos(alpha);
+	this->m_.at<float>(0,2) =  sin(phi)*sin(alpha);
+	this->m_.at<float>(0,3) =  a*cos(phi);
+
+	this->m_.at<float>(1,0) =  sin(phi);
+	this->m_.at<float>(1,1) =  cos(phi)*cos(alpha);
+	this->m_.at<float>(1,2) = -cos(phi)*sin(alpha);
+	this->m_.at<float>(1,3) =  a*sin(phi);
+
+	this->m_.at<float>(2,0) =  0;
+	this->m_.at<float>(2,1) =  sin(alpha);
+	this->m_.at<float>(2,2) =  cos(alpha);
+	this->m_.at<float>(2,3) =  d;
+
+	return this->m_;
+}
+
+
+
