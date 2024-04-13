@@ -2,9 +2,9 @@
 
 Manipulator_2D2J::Manipulator_2D2J(){
 	// define robot inital state
-	linkLenght_[0] = 3;
-	linkLenght_[1] = 3;
-	linkLenght_[2] = 2;
+	linkLenght_[0] = 150;
+	linkLenght_[1] = 150;
+	linkLenght_[2] = 100;
 	jValue_[0] = 0; // phi0
 	jValue_[1] = 0; // phi1
 
