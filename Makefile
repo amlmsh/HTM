@@ -19,20 +19,23 @@ HTM.o:	HTM.cpp
 	$(CXX) -c $(CXXFLAGS) HTM.cpp
 
 
+Cam.o:	Cam.cpp
+	$(CXX) -c $(CXXFLAGS) Cam.cpp
+
 KinChain.o: KinChain.cpp
 	$(CXX) -c $(CXXFLAGS) KinChain.cpp
 	
 	
-Test_HTM.o:	Test_HTM.cpp HTM.o KinChain.o
+Test_HTM.o:	Test_HTM.cpp HTM.o KinChain.o Cam.o
 	$(CXX) -c $(CXXFLAGS) Test_HTM.cpp
 
-Test_HTM:	Test_HTM.o HTM.o KinChain.o
+Test_HTM:	Test_HTM.o HTM.o KinChain.o Cam.o
 	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o $(LFLAGS)
 
 
 test:	Test_HTM
 
-obj:    HTM.o KinChain.o
+obj:    HTM.o KinChain.o Cam.o
 
 run:	Test_HTM
 	./Test_HTM
