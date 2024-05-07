@@ -33,18 +33,29 @@ Test_HTM:	Test_HTM.o HTM.o KinChain.o Cam.o
 	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o $(LFLAGS)
 
 
+Test_Cam.o:	Test_Cam.cpp Cam.o 
+	$(CXX) -c $(CXXFLAGS) Test_Cam.cpp
+
+
+Test_Cam:	Test_Cam.o Cam.o 
+	$(CXX) -o Test_Cam Test_Cam.o Cam.o $(LFLAGS)
+
+
+
 test:	Test_HTM
 
-obj:    HTM.o KinChain.o Cam.o
+obj:    HTM.o KinChain.o Cam.o 
 
-run:	Test_HTM
-	./Test_HTM
+test:	Test_HTM Test_Cam
+	echo "done"
 	
+run:	
+	echo "done"
 	
 doc:	
 	doxygen
 
 
 clean:
-	rm -rf DOXYGENDOC *.o Test_HTM 
+	rm -rf DOXYGENDOC *.o Test_HTM Test_Cam
 	

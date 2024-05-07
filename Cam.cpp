@@ -13,7 +13,7 @@ Cam::Cam(){
 }
 
 
-Cam::Cam(int h, int w, int fov){
+Cam::Cam(int w, int h, int fov){
 	if((h < 1) || (w < 1) || (fov < 1)){
 		throw std::string("constructor class Cam: all parameter must not be smaller than 1.");
 	};

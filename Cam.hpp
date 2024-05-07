@@ -89,7 +89,7 @@ public:
 class Cam : public ICam{
 public:
 		    Cam();
-		    Cam(int h, int w, int fov);
+		    Cam(int w, int h, int fov);
 	void    setHeight(int h);
 	void    setWidth(int w);
 	void    setFOV(int angle);
