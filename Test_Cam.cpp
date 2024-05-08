@@ -15,7 +15,6 @@ using namespace std;
 
 
 int main(){
-	std::string dummy;
 	int camW = 500;
 	int camH = 250;
 
