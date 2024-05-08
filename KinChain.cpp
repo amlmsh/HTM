@@ -1,5 +1,9 @@
 #include "KinChain.hpp"
 
+#include <iostream>
+
+using namespace std;
+
 Manipulator_2D2J::Manipulator_2D2J(){
 	// define robot inital state
 	linkLenght_[0] = 150;
@@ -90,3 +94,205 @@ void Manipulator_2D2J::setTCPCoord(cv::Point3d){
 }
 
 
+PanTilt::PanTilt(){
+	panValueRad_ = 0;
+	tiltValueRad_ = 0;
+	link0_ = 0;
+	link1_ = 0;
+	this->buildRobot();
+	return;
+}
+
+PanTilt::~PanTilt(){
+	return;
+}
+
+int  PanTilt::getNmbJoints(){
+	throw std::string("not implemented.");
+}
+
+int  PanTilt::getNmbRobotPoints(){
+	throw std::string("not implemented.");
+}
+
+void PanTilt::getRobotCoord(cv::Point3d[]){
+	throw std::string("not implemented.");
+}
+
+void PanTilt::setTCPCoord(cv::Point3d){
+	throw std::string("not implemented.");
+}
+
+void PanTilt::getJointValues(float j[]){
+	j[PAN_IDX_] = panValueRad_;
+	j[TILT_IDX_] = tiltValueRad_;
+	return;
+}
+
+void PanTilt::setJointValues(const float j[]){
+	panValueRad_ = j[PAN_IDX_];
+	tiltValueRad_ = j[TILT_IDX_];
+	this->buildRobot();
+	return;
+}
+
+
+void PanTilt::buildRobot(){
+	/**
+	 *
+	 * DH Parameter for the pan-tilt-kinematic
+	 *
+	 *  n  |     Phi_n      |  Alpha_n |   a_n   |   d_n
+	 * ---------------------------------------------------
+	 *   1 |  panValueRad_  | + PI/2   |    0    | link0_
+	 *   2 |  tiltValuRad_  | - PI/2   | link1_0 |   0
+	 *
+	 */
+
+
+	DH_Param_1_[DH_PARAM_PHI_IDX_]   = panValueRad_;
+	DH_Param_1_[DH_PARAM_ALPHA_IDX_] = 0.5*3.14159;
+	DH_Param_1_[DH_PARAM_A_IDX_]     = 0;
+	DH_Param_1_[DH_PARAM_D_IDX_]     = link0_;
+
+	DH_Param_2_[DH_PARAM_PHI_IDX_]   = tiltValueRad_;
+	DH_Param_2_[DH_PARAM_ALPHA_IDX_] = -0.5*3.14159;;
+	DH_Param_2_[DH_PARAM_A_IDX_]     = link1_;
+	DH_Param_2_[DH_PARAM_D_IDX_]     = 0;
+
+
+	T_1_0_.updateDHparam(DH_Param_1_[DH_PARAM_PHI_IDX_],
+			             DH_Param_1_[DH_PARAM_ALPHA_IDX_],
+						 DH_Param_1_[DH_PARAM_A_IDX_],
+						 DH_Param_1_[DH_PARAM_D_IDX_]);
+
+	T_2_1_.updateDHparam(DH_Param_2_[DH_PARAM_PHI_IDX_],
+			             DH_Param_2_[DH_PARAM_ALPHA_IDX_],
+						 DH_Param_2_[DH_PARAM_A_IDX_],
+						 DH_Param_2_[DH_PARAM_D_IDX_]);
+
+	T_2_0_ = T_1_0_.current() * T_2_1_.current();
+	cv::invert(T_2_0_,T_0_2_);
+	return;
+}
+
+
+cv::Mat PanTilt::getForwardKin(){
+	return T_2_0_;
+
+}
+
+cv::Mat PanTilt::getInvertedForwardKin(){
+	return T_0_2_;
+}
+
+
+
+
+
+PanTiltActiveVisionSystem::PanTiltActiveVisionSystem(int width, int height, int FOV){
+	panTilt_ = new PanTilt();
+	cam_ = new Cam(width, height, FOV);
+	return;
+}
+
+PanTiltActiveVisionSystem::~PanTiltActiveVisionSystem(){
+	delete panTilt_;
+	delete cam_;
+	return;
+}
+
+
+void    PanTiltActiveVisionSystem::setPan(float angleRad){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	valuesRad[panTilt_->PAN_IDX_] = angleRad;
+	panTilt_->setJointValues(valuesRad);
+	return;
+}
+
+void    PanTiltActiveVisionSystem::setTilt(float angleRad){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	valuesRad[panTilt_->TILT_IDX_] = angleRad;
+	panTilt_->setJointValues(valuesRad);
+	return;
+}
+
+
+void    PanTiltActiveVisionSystem::setDeltaPan(float deltaAngleRad){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	valuesRad[panTilt_->PAN_IDX_] += deltaAngleRad;
+	panTilt_->setJointValues(valuesRad);
+	return;
+}
+
+void    PanTiltActiveVisionSystem::setDeltaTilt(float deltaAngleRad){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	valuesRad[panTilt_->TILT_IDX_] += deltaAngleRad;
+	panTilt_->setJointValues(valuesRad);
+	return;
+}
+
+float   PanTiltActiveVisionSystem::getPan(){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	return valuesRad[panTilt_->PAN_IDX_];
+}
+
+float   PanTiltActiveVisionSystem::getTilt(){
+	float valuesRad[2];
+	panTilt_->getJointValues(valuesRad);
+	return valuesRad[panTilt_->TILT_IDX_];
+}
+
+int     PanTiltActiveVisionSystem::getWidth(){
+	return cam_->getWidth();
+}
+
+
+int     PanTiltActiveVisionSystem::getHeight(){
+	return cam_->getHeight();
+}
+
+cv::Mat PanTiltActiveVisionSystem::getImgData(cv::Point3d p){
+	cv::Mat invFK = panTilt_->getInvertedForwardKin();
+	cv::Point3d pCamCoordSys;
+
+	cv::Mat pHomo = cv::Mat::zeros(4,1,CV_32F);
+	cv::Mat pHomoRes = cv::Mat::zeros(4,1,CV_32F);
+	pHomo.at<float>(1,1) = p.x;
+	pHomo.at<float>(2,1) = p.y;
+	pHomo.at<float>(3,1) = p.z;
+	pHomo.at<float>(4,1) = 1.0;
+
+	pHomoRes = invFK * pHomo;
+
+	pCamCoordSys.x = pHomoRes.at<float>(1,1);
+	pCamCoordSys.y = pHomoRes.at<float>(2,1);
+	pCamCoordSys.z = pHomoRes.at<float>(3,1);
+
+	return (cam_->getImgData(pCamCoordSys));
+}
+
+void    PanTiltActiveVisionSystem::getPixelData(cv::Point3d p, int pixel[2]){
+	cv::Mat invFK = panTilt_->getInvertedForwardKin();
+	cv::Point3d pCamCoordSys;
+
+	cv::Mat pHomo = cv::Mat::zeros(4,1,CV_32F);
+	cv::Mat pHomoRes = cv::Mat::zeros(4,1,CV_32F);
+	pHomo.at<float>(1,1) = p.x;
+	pHomo.at<float>(2,1) = p.y;
+	pHomo.at<float>(3,1) = p.z;
+	pHomo.at<float>(4,1) = 1.0;
+
+	pHomoRes = invFK * pHomo;
+
+	pCamCoordSys.x = pHomoRes.at<float>(1,1);
+	pCamCoordSys.y = pHomoRes.at<float>(2,1);
+	pCamCoordSys.z = pHomoRes.at<float>(3,1);
+
+	return (cam_->getPixelData(pCamCoordSys,pixel));
+}

@@ -26,11 +26,11 @@ KinChain.o: KinChain.cpp
 	$(CXX) -c $(CXXFLAGS) KinChain.cpp
 	
 	
-Test_HTM.o:	Test_HTM.cpp HTM.o KinChain.o Cam.o
+Test_HTM.o:	Test_HTM.cpp HTM.o KinChain.o
 	$(CXX) -c $(CXXFLAGS) Test_HTM.cpp
 
 Test_HTM:	Test_HTM.o HTM.o KinChain.o Cam.o
-	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o $(LFLAGS)
+	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o Cam.o  $(LFLAGS)
 
 
 Test_Cam.o:	Test_Cam.cpp Cam.o 
@@ -41,12 +41,18 @@ Test_Cam:	Test_Cam.o Cam.o
 	$(CXX) -o Test_Cam Test_Cam.o Cam.o $(LFLAGS)
 
 
+Test_KinChain.o:	Test_KinChain.cpp HTM.o Cam.o KinChain.o
+	$(CXX) -c $(CXXFLAGS) Test_KinChain.cpp
 
-test:	Test_HTM
+
+Test_KinChain:	Test_KinChain.o Cam.o KinChain.o HTM.o 
+	$(CXX) -o Test_KinChain Test_KinChain.o Cam.o KinChain.o HTM.o $(LFLAGS)
+
+test:	Test_HTM 
 
 obj:    HTM.o KinChain.o Cam.o 
 
-test:	Test_HTM Test_Cam
+test:	Test_HTM Test_Cam Test_KinChain
 	echo "done"
 	
 run:	
@@ -57,5 +63,5 @@ doc:
 
 
 clean:
-	rm -rf DOXYGENDOC *.o Test_HTM Test_Cam
+	rm -rf DOXYGENDOC *.o Test_HTM Test_Cam Test_KinChain
 	
