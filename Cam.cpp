@@ -56,7 +56,18 @@ void Cam::setFOV(int angle){
 }
 
 cv::Mat Cam::getImgData(cv::Point3d p){
-	throw std::string("nyi");
+	int pixel[2];
+	cv::Scalar color = cv::Scalar(255,255,255);
+	cv::Point pix2D;
+	cv::Mat img = cv::Mat::zeros(height_,width_,CV_8UC3);
+	if(isPointInFOV(p) == 0){
+		return img;
+	};
+	this->getPixelData(p,pixel);
+	pix2D.x = pixel[0]; // width
+	pix2D.y = pixel[1]; // height
+	cv::circle(img, pix2D, 2, color, cv::FILLED, cv::LINE_8 );
+	return img;
 }
 
 
@@ -76,7 +87,7 @@ float Cam::deg2rad(int angleDeg){
 int Cam::interSectionPointToPixelCoord(float value, int imageDim){
 	float tmp1, tmp2;
 
-	tmp1 = ((float)(imageDim - 1) / 2.0);
+	tmp1 = ((float)(imageDim - 1) * 0.5);
 	tmp2 = ((-value)/(tan(FOVrad_*0.5))) + 1.0;
 
 	int pixelValue = ((tmp1*tmp2)+0.5);
@@ -106,5 +117,13 @@ void   Cam::getPixelData(cv::Point3d p, int pixel[2]){
 }
 
 
+int	Cam::getWidth(){
+	return width_;
+}
+
+
+int	Cam::getHeight(){
+	return height_;
+}
 
 

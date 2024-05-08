@@ -82,6 +82,8 @@ public:
 	 */
 	virtual void    getPixelData(cv::Point3d p, int pixel[2]) = 0;
 
+	virtual int     getWidth() = 0;
+	virtual int     getHeight() = 0;
 };
 
 
@@ -91,7 +93,9 @@ public:
 		    Cam();
 		    Cam(int w, int h, int fov);
 	void    setHeight(int h);
+	int     getHeight();
 	void    setWidth(int w);
+	int     getWidth();
 	void    setFOV(int angle);
 	cv::Mat getImgData(cv::Point3d p);
 	void    getPixelData(cv::Point3d p, int pixel[2]);

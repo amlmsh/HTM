@@ -11,12 +11,15 @@
 #include "opencv2/highgui.hpp"
 #include <iostream>
 
+using namespace std;
+
 
 int main(){
-	int camW = 300;
-	int camH = 400;
+	std::string dummy;
+	int camW = 500;
+	int camH = 250;
 
-	Cam c(camW, camH, 90);
+	Cam c(camW, camH, 55);
 	float x,y,z;
 	cv::Point3d v;
 	cv::Point pix;
@@ -24,27 +27,20 @@ int main(){
 
 
 	namedWindow("Cam", cv::WINDOW_AUTOSIZE); // Create Window
-	cv::Mat src = cv::Mat::zeros( camW, camH, CV_8UC3 );
-	cv::Scalar color = cv::Scalar(255,255,255);
+	cv::Mat src = cv::Mat::zeros(c.getHeight(),c.getWidth(),CV_8UC3);
 
-	x = 10.0;
-	for(y=-2; y < 2; y=y+0.1){
+	x = 1.0;
+	for(y=-3.14; y < 3.14; y=y+0.1){
 		z = y;
 		v.x=x;
-		v.y=y;
-		v.z=z;
+		v.y=sin(y);
+		v.z=cos(y);
 		c.getPixelData(v,pixel);
-		std::cout << "[WxH]=[" << pixel[0] << ", " << pixel[1] << "]\n";
-
-		cv::Point pix(pixel[0],pixel[1]);
-
-		cv::circle( src, pix, 3, color, cv::FILLED, cv::LINE_8 );
-		imshow( "Cam", src);
+		src =  src + c.getImgData(v);
 	}
 
-
+	imshow( "Cam", src);
 	cv::waitKey(0);
-
 
 	return 0;
 }
