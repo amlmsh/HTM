@@ -280,16 +280,16 @@ cv::Mat PanTiltActiveVisionSystem::getImgData(cv::Point3d p){
 
 	cv::Mat pHomo = cv::Mat::zeros(4,1,CV_32F);
 	cv::Mat pHomoRes = cv::Mat::zeros(4,1,CV_32F);
-	pHomo.at<float>(1,1) = p.x;
-	pHomo.at<float>(2,1) = p.y;
-	pHomo.at<float>(3,1) = p.z;
-	pHomo.at<float>(4,1) = 1.0;
+	pHomo.at<float>(0,0) = p.x;
+	pHomo.at<float>(1,0) = p.y;
+	pHomo.at<float>(2,0) = p.z;
+	pHomo.at<float>(3,0) = 1.0;
 
 	pHomoRes = invFK * pHomo;
 
-	pCamCoordSys.x = pHomoRes.at<float>(1,1);
-	pCamCoordSys.y = pHomoRes.at<float>(2,1);
-	pCamCoordSys.z = pHomoRes.at<float>(3,1);
+	pCamCoordSys.x = pHomoRes.at<float>(0,0);
+	pCamCoordSys.y = pHomoRes.at<float>(1,0);
+	pCamCoordSys.z = pHomoRes.at<float>(2,0);
 
 	return (cam_->getImgData(pCamCoordSys));
 }
