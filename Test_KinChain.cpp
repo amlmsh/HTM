@@ -19,12 +19,13 @@ using namespace std;
 
 void Test_PanTilt();
 void Test_PanTiltActiveVis();
+void Test_PanTiltActiveVis1();
 
 int main(){
 
 	//Test_PanTilt();
 
-	Test_PanTiltActiveVis();
+	Test_PanTiltActiveVis1();
 
 	return 0;
 }
@@ -47,6 +48,36 @@ void Test_PanTilt(){
 	}while(1);
 
 	return;
+}
+
+void Test_PanTiltActiveVis1(){
+	// object (point) is fixed, camera moves
+	PanTiltActiveVisionSystem ptActVis;
+
+	float p,t;
+	int pixel[2];
+	cv::Point3d v;
+	v.x = 3;
+	v.y = 0;
+	v.z = 0;
+
+	namedWindow("PanTiltActVis", cv::WINDOW_AUTOSIZE); // Create Window
+	cv::Mat src = cv::Mat::zeros(ptActVis.getHeight(),ptActVis.getWidth(),CV_8UC3);
+
+
+	for(float a=0.0; a< 2*PI; a=a+0.01){
+
+		ptActVis.setPan(a);
+		ptActVis.setTilt(a);
+		ptActVis.getPixelData(v,pixel);
+		src = src + ptActVis.getImgData(v);
+	}
+
+	imshow( "PanTiltActVis", src);
+	cv::waitKey(0);
+
+	return;
+
 }
 
 
