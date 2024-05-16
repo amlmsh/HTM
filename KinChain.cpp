@@ -108,15 +108,32 @@ PanTilt::~PanTilt(){
 }
 
 int  PanTilt::getNmbJoints(){
-	throw std::string("not implemented.");
+	return 2;
 }
 
 int  PanTilt::getNmbRobotPoints(){
-	throw std::string("not implemented.");
+	return 3;
 }
 
-void PanTilt::getRobotCoord(cv::Point3d[]){
-	throw std::string("not implemented.");
+void PanTilt::getRobotCoord(cv::Point3d p[]){
+	this->buildRobot();
+
+	// read joint coordinates (incl. TCP)
+	// base (with joint 0)
+	p[0] = cv::Point3d(0,0,0);
+
+	// joint 1
+	p[1] = cv::Point3d(T_1_0_.current().at<float>(0,3),
+							 T_1_0_.current().at<float>(1,3),
+							 T_1_0_.current().at<float>(2,3));
+
+	// TCP
+	p[2] = cv::Point3d(T_2_0_.at<float>(0,3),
+							 T_2_0_.at<float>(1,3),
+							 T_2_0_.at<float>(2,3));
+
+
+	return;
 }
 
 void PanTilt::setTCPCoord(cv::Point3d){
@@ -283,19 +300,19 @@ void    PanTiltActiveVisionSystem::getPixelData(cv::Point3d p, int pixel[2]){
 
 	cv::Mat pHomo = cv::Mat::zeros(4,1,CV_32F);
 	cv::Mat pHomoRes = cv::Mat::zeros(4,1,CV_32F);
-	pHomo.at<float>(1,1) = 1.0; // p.x;
-	pHomo.at<float>(2,1) = 2.0; // p.y;
-	pHomo.at<float>(3,1) = 3.0; // p.z;
-	pHomo.at<float>(4,1) = 4.0;
+	pHomo.at<float>(0,0) = p.x;
+	pHomo.at<float>(1,0) = p.y;
+	pHomo.at<float>(2,0) = p.z;
+	pHomo.at<float>(3,0) = 1.0;
 
 	pHomoRes = invFK * pHomo;
-	cout << invFK << endl;
-	cout << pHomo << endl;
-	cout << pHomoRes << endl << endl;
+	cout << "inv      : " << invFK << endl;
+	cout << "pHomo    : " << pHomo << endl;
+	cout << "pHomeCalc: " << pHomoRes << endl << endl;
 
-	pCamCoordSys.x = pHomoRes.at<float>(1,1);
-	pCamCoordSys.y = pHomoRes.at<float>(2,1);
-	pCamCoordSys.z = pHomoRes.at<float>(3,1);
+	pCamCoordSys.x = pHomoRes.at<float>(0,0);
+	pCamCoordSys.y = pHomoRes.at<float>(1,0);
+	pCamCoordSys.z = pHomoRes.at<float>(2,0);
 
 	return (cam_->getPixelData(pCamCoordSys,pixel));
 }
