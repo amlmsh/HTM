@@ -104,6 +104,7 @@ void   Cam::getPixelData(cv::Point3d p, int pixel[2]){
 	if(isPointInFOV(p) == 0){
 		pixel[0] = -1;
 		pixel[1] = -1;
+		return;
 	}
 
 	float intSecPointY, intSecPointZ;

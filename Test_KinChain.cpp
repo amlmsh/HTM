@@ -71,14 +71,14 @@ void Test_PanTiltActiveVis(){
 	src = src + ptActVis.getImgData(v);
 	cout << pixel[0] << ",  " << pixel[1] << endl;
 
-	v.y = 1.5;
-	v.z = 1.5;
+	v.y = 10.5;
+	v.z = 10.5;
 	ptActVis.getPixelData(v,pixel);
 	src = src + ptActVis.getImgData(v);
 	cout << pixel[0] << ",  " << pixel[1] << endl;
 
-	v.y = -1.5;
-	v.z = -1.5;
+	v.y = -10.5;
+	v.z = -10.5;
 	ptActVis.getPixelData(v,pixel);
 	src = src + ptActVis.getImgData(v);
 	cout << pixel[0] << ",  " << pixel[1] << endl;

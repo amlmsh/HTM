@@ -100,8 +100,15 @@ public:
 	void    getPixelData(cv::Point3d p, int pixel[2]);
 
 protected:
+
+
+
+
 	PanTilt *panTilt_ = NULL;
 	Cam     *cam_ = NULL;
+
+private:
+	cv::Point3d calcCoordInCamFrame(cv::Point3d p);
 };
 
 /**
