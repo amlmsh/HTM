@@ -1,6 +1,7 @@
 #include "HTM.hpp"
 
 #include <string>
+#include <iostream>
 
 
 IHTM *factory(char mType, float angle, float x, float y, float z){

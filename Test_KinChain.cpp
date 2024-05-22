@@ -20,15 +20,92 @@ using namespace std;
 void Test_PanTilt();
 void Test_PanTiltActiveVis();
 void Test_PanTiltActiveVis1();
+void Test_PanTiltActiveVis2();
+
+
+static void on_trackbarVis2CamA_Pan( int, void* );
+static void on_trackbarVis2CamA_Tilt( int, void* );
+
+const int camW = 300;
+const int camH = camW;
+
+cv::Mat src = src.zeros(camH, camW, CV_8UC3 );;
+
 
 int main(){
 
 	//Test_PanTilt();
-
-	Test_PanTiltActiveVis1();
+	//Test_PanTiltActiveVis();
+	//Test_PanTiltActiveVis1();
+	Test_PanTiltActiveVis2();
 
 	return 0;
 }
+
+
+void Test_PanTiltActiveVis2(){
+
+	PanTiltActiveVisionSystem pt(camW,camH,90);
+
+	int pan_slider  = 180;
+	int tilt_slider = 180;
+	int pan_slider_max = 360;
+	int tilt_slider_max = 360;
+
+
+
+
+
+	 namedWindow("active cam A", cv::WINDOW_AUTOSIZE); // Create Window
+	 cv::createTrackbar( "PAN", "active cam A", &pan_slider,  pan_slider_max,  on_trackbarVis2CamA_Pan, &pt );
+	 cv::createTrackbar( "TILT","active cam A", &tilt_slider, tilt_slider_max, on_trackbarVis2CamA_Tilt, &pt );
+
+	 cout << "pan:" << pan_slider << "  tilt: " << tilt_slider << endl;
+
+	 cv::waitKey(0);
+	 return;
+}
+
+static void on_trackbarVis2CamA_Pan( int newValue, void* panTiltActVis){
+	PanTiltActiveVisionSystem *pt;
+	pt = (PanTiltActiveVisionSystem *) panTiltActVis;
+	cv::Point3d v;
+	v.x = 3;
+	v.y = 0;
+	v.z = 0;
+	int pixel[2];
+	pt->setPan( ((((float)newValue)*PI)/(float)180) - PI); // rad = newValue*PI/180 - PI
+
+	cout << "[pan,tilt] = [" << pt->getPan() << ", " << pt->getTilt() << "]\n";
+
+	src = pt->getImgData(v);
+	pt->getPixelData(v,pixel);
+	cout << "[X,Y] = [" << pixel[0] << ", " << pixel[1] << "]\n";
+
+	imshow( "active cam A", src);
+	return;
+}
+
+static void on_trackbarVis2CamA_Tilt( int newValue, void* panTiltActVis){
+	PanTiltActiveVisionSystem *pt;
+	pt = (PanTiltActiveVisionSystem *) panTiltActVis;
+	cv::Point3d v;
+	v.x = 3;
+	v.y = 0;
+	v.z = 0;
+	int pixel[2];
+	pt->setTilt( ((((float)newValue)*PI)/(float)180) - PI); // rad = newValue*PI/180 - PI
+
+	cout << "[pan,tilt] = [" << pt->getPan() << ", " << pt->getTilt() << "]\n";
+
+	src = pt->getImgData(v);
+	pt->getPixelData(v,pixel);
+	cout << "[X,Y] = [" << pixel[0] << ", " << pixel[1] << "]\n";
+
+	imshow( "active cam A", src);
+	return;
+}
+
 
 
 void Test_PanTilt(){
@@ -52,7 +129,7 @@ void Test_PanTilt(){
 
 void Test_PanTiltActiveVis1(){
 	// object (point) is fixed, camera moves
-	PanTiltActiveVisionSystem ptActVis;
+	PanTiltActiveVisionSystem ptActVis(1200,1200,120);
 
 	float p,t;
 	int pixel[2];
@@ -61,17 +138,41 @@ void Test_PanTiltActiveVis1(){
 	v.y = 0;
 	v.z = 0;
 
+	float pAbsMax = 0.01;
+
 	namedWindow("PanTiltActVis", cv::WINDOW_AUTOSIZE); // Create Window
 	cv::Mat src = cv::Mat::zeros(ptActVis.getHeight(),ptActVis.getWidth(),CV_8UC3);
 
+	int i = 0;
+	while(i < 14){
+		i++;
 
-	for(float a=0.0; a< 2*PI; a=a+0.01){
+		for(p=-pAbsMax; p< pAbsMax; p=p + (pAbsMax/100.0)){
+			t = sqrt(pAbsMax*pAbsMax - p*p);
+			ptActVis.setPan(p)	;
+			ptActVis.setTilt(t);
 
-		ptActVis.setPan(a);
-		ptActVis.setTilt(a);
-		ptActVis.getPixelData(v,pixel);
-		src = src + ptActVis.getImgData(v);
+			cout << p << " " << t << endl;
+			ptActVis.getPixelData(v,pixel);
+			src = src + ptActVis.getImgData(v);
+
+			pAbsMax = pAbsMax + (pAbsMax/1000.0);
+		}
+		for(p=pAbsMax; p> -pAbsMax; p= p - (pAbsMax/100.0)){
+			t = -sqrt(pAbsMax*pAbsMax - p*p);
+			ptActVis.setPan(p)	;
+			ptActVis.setTilt(t);
+			cout << p << " " << t << endl;
+			ptActVis.getPixelData(v,pixel);
+
+			src = src + ptActVis.getImgData(v);
+
+			pAbsMax = pAbsMax + (pAbsMax/1000.0);
+		}
+
 	}
+
+
 
 	imshow( "PanTiltActVis", src);
 	cv::waitKey(0);
@@ -86,7 +187,6 @@ void Test_PanTiltActiveVis(){
 	// camera is fixed, objects (points) are located at different places
 	PanTiltActiveVisionSystem ptActVis;
 
-	float p,t;
 	int pixel[2];
 	cv::Point3d v;
 	v.x = 3;

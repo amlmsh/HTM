@@ -74,6 +74,7 @@ cv::Mat Cam::getImgData(cv::Point3d p){
 
 int Cam::isPointInFOV(cv::Point3d p){
 	float maxPosFOV = tan(FOVrad_/2.0);
+	if(p.x <= 0) return 0;
 	if( fabs(p.y / p.x) > maxPosFOV) return 0;
 	if( fabs(p.z / p.x) > maxPosFOV) return 0;
 	return 1;

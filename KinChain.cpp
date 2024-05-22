@@ -296,12 +296,7 @@ cv::Point3d PanTiltActiveVisionSystem::calcCoordInCamFrame(cv::Point3d p){
 	pHomo.at<float>(1,0) = p.y;
 	pHomo.at<float>(2,0) = p.z;
 	pHomo.at<float>(3,0) = 1.0;
-
 	pHomoRes = invFK * pHomo;
-	cout << "inv      : " << invFK << endl;
-	cout << "pHomo    : " << pHomo << endl;
-	cout << "pHomeCalc: " << pHomoRes << endl << endl;
-
 	pCamCoordSys.x = pHomoRes.at<float>(0,0);
 	pCamCoordSys.y = pHomoRes.at<float>(1,0);
 	pCamCoordSys.z = pHomoRes.at<float>(2,0);
