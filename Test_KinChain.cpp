@@ -21,27 +21,37 @@ void Test_PanTilt(char c);
 void Test_PanTiltActiveVis(char c);
 void Test_PanTiltActiveVis1(char c);
 void Test_PanTiltActiveVis2(char c);
+void Test_PanTiltActiveVis3(char c);
 
 
 static void on_trackbarVis2CamA_Pan( int, void* );
 static void on_trackbarVis2CamA_Tilt( int, void* );
 
+
+static void on_trackbarVis3_Pan( int, void* );
+static void on_trackbarVis3_Tilt( int, void* );
+
+
+void createWorld(PanTiltActiveVisionSystem *ptAV);
+
+
 const int camW = 300;
 const int camH = camW;
 
-cv::Mat src = src.zeros(camH, camW, CV_8UC3 );;
+cv::Mat src = src.zeros(camH, camW, CV_8UC3 );
 
 
 int main(){
 	char c;
 
-	c = 'H';
+	c = 'D';
 
 	try{
 		//Test_PanTilt(c);
-		Test_PanTiltActiveVis(c);
+		//Test_PanTiltActiveVis(c);
 		//Test_PanTiltActiveVis1(c);
 		//Test_PanTiltActiveVis2(c);
+		Test_PanTiltActiveVis3(c);
 	}catch(string msg){
 		std::cout << "Error: " << msg;
 	}catch(...){
@@ -49,6 +59,57 @@ int main(){
 	}
 
 	return 0;
+}
+
+
+
+void Test_PanTiltActiveVis3(char c){
+	PanTiltActiveVisionSystem pt(camW,camH,170, c);
+
+	int pan_slider  = 180;
+	int tilt_slider = 180;
+	int pan_slider_max = 360;
+	int tilt_slider_max = 360;
+
+	namedWindow("view world", cv::WINDOW_AUTOSIZE); // Create Window
+	cv::createTrackbar( "PAN", "view world", &pan_slider,  pan_slider_max,  on_trackbarVis3_Pan, &pt );
+    cv::createTrackbar( "TILT","view world", &tilt_slider, tilt_slider_max, on_trackbarVis3_Tilt, &pt );
+
+	cv::waitKey(0);
+	return;
+}
+
+
+static void on_trackbarVis3_Pan( int newValue, void* pt){
+	((PanTiltActiveVisionSystem*)pt)->setPan( ((((float)newValue)*PI)/(float)180) - PI); // rad = newValue*PI/180 - PI
+	createWorld((PanTiltActiveVisionSystem*) pt);
+	imshow( "view world", src);
+	return;
+}
+
+static void on_trackbarVis3_Tilt( int newValue, void* pt){
+	((PanTiltActiveVisionSystem*)pt)->setTilt( ((((float)newValue)*PI)/(float)180) - PI); // rad = newValue*PI/180 - PI
+	createWorld((PanTiltActiveVisionSystem*) pt);
+	imshow( "view world", src);
+	return;
+}
+
+void createWorld(PanTiltActiveVisionSystem *ptAV){
+	float x = 1000.0;
+	float limit = 6000;
+	float step = limit / 7;
+
+	src = src.zeros(camH, camW, CV_8UC3 );
+	cv::Point3d v;
+	for(float y = -limit; y < limit; y+=step){
+		for(float z = -limit; z < limit; z+=step){
+			v.x = x;
+			v.y = y;
+			v.z = z;
+			src = src + ptAV->getImgData(v);
+		}
+	}
+	return;
 }
 
 

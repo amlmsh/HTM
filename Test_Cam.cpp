@@ -17,32 +17,31 @@ using namespace std;
 int main(){
 	int camW = 500;
 	int camH = 250;
+	float x = 2000.0;
+	float limit = 6000;
+	float step = limit / 2;
 
-	Cam c(camW, camH, 55);
-	float x,y,z;
-	cv::Point3d v;
+	Cam cam(camW, camH, 160);
+
 	cv::Point pix;
-	int pixel[2];
-
 
 	namedWindow("Cam", cv::WINDOW_AUTOSIZE); // Create Window
-	cv::Mat src = cv::Mat::zeros(c.getHeight(),c.getWidth(),CV_8UC3);
+	cv::Mat src = cv::Mat::zeros(cam.getHeight(),cam.getWidth(),CV_8UC3);
 
-    z = 0;
-    z += 0;
-	x = 1.0;
-	for(y=-3.14; y < 3.14; y=y+0.1){
-		z = y;
-		v.x=x;
-		v.y=sin(y);
-		v.z=cos(y);
-		c.getPixelData(v,pixel);
-		src =  src + c.getImgData(v);
+
+	cv::Point3d v;
+	for(float y = -limit; y <= limit; y+=step){
+		for(float z = -limit; z <= limit; z+=step){
+			v.x = x;
+			v.y = y;
+			v.z = z;
+			src = src + cam.getImgData(v);
+			cout << y << endl;
+		}
 	}
 
 	imshow( "Cam", src);
 	cv::waitKey(0);
-
 	return 0;
 }
 
