@@ -94,7 +94,7 @@ void Manipulator_2D2J::setTCPCoord(cv::Point3d){
 }
 
 
-PanTilt::PanTilt(){
+PanTilt_DH::PanTilt_DH(){
 	panValueRad_ = 0;
 	tiltValueRad_ = 0;
 	link0_ = 0;
@@ -103,19 +103,23 @@ PanTilt::PanTilt(){
 	return;
 }
 
-PanTilt::~PanTilt(){
+PanTilt_DH::~PanTilt_DH(){
 	return;
 }
 
-int  PanTilt::getNmbJoints(){
+
+unsigned int PanTilt_DH::getPanIdx(){return 0;};
+unsigned int PanTilt_DH::getTiltIdx(){return 1;};
+
+int  PanTilt_DH::getNmbJoints(){
 	return 2;
 }
 
-int  PanTilt::getNmbRobotPoints(){
+int  PanTilt_DH::getNmbRobotPoints(){
 	return 3;
 }
 
-void PanTilt::getRobotCoord(cv::Point3d p[]){
+void PanTilt_DH::getRobotCoord(cv::Point3d p[]){
 	this->buildRobot();
 
 	// read joint coordinates (incl. TCP)
@@ -136,25 +140,25 @@ void PanTilt::getRobotCoord(cv::Point3d p[]){
 	return;
 }
 
-void PanTilt::setTCPCoord(cv::Point3d){
+void PanTilt_DH::setTCPCoord(cv::Point3d){
 	throw std::string("not implemented.");
 }
 
-void PanTilt::getJointValues(float j[]){
-	j[PAN_IDX_] = panValueRad_;
-	j[TILT_IDX_] = tiltValueRad_;
+void PanTilt_DH::getJointValues(float j[]){
+	j[this->getPanIdx()] = panValueRad_;
+	j[this->getTiltIdx()] = tiltValueRad_;
 	return;
 }
 
-void PanTilt::setJointValues(const float j[]){
-	panValueRad_ = j[PAN_IDX_];
-	tiltValueRad_ = j[TILT_IDX_];
+void PanTilt_DH::setJointValues(const float j[]){
+	panValueRad_ = j[this->getPanIdx()];
+	tiltValueRad_ = j[this->getTiltIdx()];
 	this->buildRobot();
 	return;
 }
 
 
-void PanTilt::buildRobot(){
+void PanTilt_DH::buildRobot(){
 	/**
 	 *
 	 * DH Parameter for the pan-tilt-kinematic
@@ -194,12 +198,12 @@ void PanTilt::buildRobot(){
 }
 
 
-cv::Mat PanTilt::getForwardKin(){
+cv::Mat PanTilt_DH::getForwardKin(){
 	return T_2_0_;
 
 }
 
-cv::Mat PanTilt::getInvertedForwardKin(){
+cv::Mat PanTilt_DH::getInvertedForwardKin(){
 	return T_0_2_;
 }
 
@@ -207,9 +211,27 @@ cv::Mat PanTilt::getInvertedForwardKin(){
 
 
 
-PanTiltActiveVisionSystem::PanTiltActiveVisionSystem(int width, int height, int FOV){
-	panTilt_ = new PanTilt();
-	cam_ = new Cam(width, height, FOV);
+PanTiltActiveVisionSystem::PanTiltActiveVisionSystem(int width, int height, int FOV, char c){
+	if((c != 'H') && (c != 'D')){
+		throw string("Type-of-camera parameter is not correct. Please check documentation.");
+	}
+
+	if(c == 'H'){
+		panTilt_ = new PanTilt_HTM();
+	}else{
+		panTilt_ = new PanTilt_DH();
+	}
+
+	try{
+		cam_ = new Cam(width, height, FOV);
+	}catch(string msg){
+		string s("Constructor PanTilActiveVisionSystem::");
+		s = s + msg;
+		throw s;
+	}catch(...){
+		string s("Constructor PanTilActiveVisionSystem::unknown error.");
+		throw s;
+	}
 	return;
 }
 
@@ -221,48 +243,48 @@ PanTiltActiveVisionSystem::~PanTiltActiveVisionSystem(){
 
 
 void    PanTiltActiveVisionSystem::setPan(float angleRad){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	valuesRad[panTilt_->PAN_IDX_] = angleRad;
+	valuesRad[panTilt_->getPanIdx()] = angleRad;
 	panTilt_->setJointValues(valuesRad);
 	return;
 }
 
 void    PanTiltActiveVisionSystem::setTilt(float angleRad){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	valuesRad[panTilt_->TILT_IDX_] = angleRad;
+	valuesRad[panTilt_->getTiltIdx()] = angleRad;
 	panTilt_->setJointValues(valuesRad);
 	return;
 }
 
 
 void    PanTiltActiveVisionSystem::setDeltaPan(float deltaAngleRad){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	valuesRad[panTilt_->PAN_IDX_] += deltaAngleRad;
+	valuesRad[panTilt_->getPanIdx()] += deltaAngleRad;
 	panTilt_->setJointValues(valuesRad);
 	return;
 }
 
 void    PanTiltActiveVisionSystem::setDeltaTilt(float deltaAngleRad){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	valuesRad[panTilt_->TILT_IDX_] += deltaAngleRad;
+	valuesRad[panTilt_->getTiltIdx()] += deltaAngleRad;
 	panTilt_->setJointValues(valuesRad);
 	return;
 }
 
 float   PanTiltActiveVisionSystem::getPan(){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	return valuesRad[panTilt_->PAN_IDX_];
+	return valuesRad[panTilt_->getPanIdx()];
 }
 
 float   PanTiltActiveVisionSystem::getTilt(){
-	float valuesRad[2];
+	float valuesRad[panTilt_->getNmbJoints()];
 	panTilt_->getJointValues(valuesRad);
-	return valuesRad[panTilt_->TILT_IDX_];
+	return valuesRad[panTilt_->getTiltIdx()];
 }
 
 int     PanTiltActiveVisionSystem::getWidth(){
@@ -303,3 +325,132 @@ cv::Point3d PanTiltActiveVisionSystem::calcCoordInCamFrame(cv::Point3d p){
 
 	return pCamCoordSys;
 }
+
+
+
+PanTilt_HTM::PanTilt_HTM(){
+	panValueRad_ = 0.0;
+	tiltValueRad_ = 0.0;
+	link0_ = 0.0;
+	link1_ = 0.0;
+
+	// define robot inital state
+	linkLenght_[0] = 0;
+	linkLenght_[1] = 0;
+	linkLenght_[2] = link0_;
+	linkLenght_[3] = link1_;
+
+	jValue_[0] = panValueRad_;
+	jValue_[1] = -0.5*3.14159; // const -PI/2
+	jValue_[2] = tiltValueRad_;
+	jValue_[3] = 0.5*3.14159; // const PI/2
+
+
+	buildRobot();
+
+	return;
+}
+
+
+unsigned int PanTilt_HTM::getPanIdx(){return 0;};
+unsigned int PanTilt_HTM::getTiltIdx(){return 2;};
+
+PanTilt_HTM::~PanTilt_HTM(){
+	if(this->T_1_0_ != NULL) delete this->T_1_0_;
+	if(this->T_2_1_ != NULL) delete this->T_2_1_;
+	if(this->T_3_2_ != NULL) delete this->T_3_2_;
+	if(this->T_4_3_ != NULL) delete this->T_4_3_;
+	return;
+}
+
+
+int  PanTilt_HTM::getNmbJoints(){
+	return this->nmbJoints_;
+}
+
+int  PanTilt_HTM::getNmbRobotPoints(){
+	return this->nmbRobotPoints_;
+}
+
+
+cv::Mat PanTilt_HTM::getForwardKin(){
+	return forwardKin_;
+}
+
+cv::Mat PanTilt_HTM::getInvertedForwardKin(){
+	cv::invert(forwardKin_,invForwardKin_);
+	return invForwardKin_;
+}
+
+
+void PanTilt_HTM::getRobotCoord(cv::Point3d points[]){
+	for(int i=0; i < nmbRobotPoints_; i++){
+		points[i] = jCoord_[i];
+	}
+	return;
+}
+
+void PanTilt_HTM::getJointValues(float v[]){
+	v[this->getPanIdx()] = jValue_[this->getPanIdx()];
+	v[this->getTiltIdx()] = jValue_[this->getTiltIdx()];
+	return;
+}
+
+void PanTilt_HTM::setJointValues(const float v[]){
+	jValue_[this->getPanIdx()] = v[this->getPanIdx()];
+	jValue_[this->getTiltIdx()] = v[this->getTiltIdx()];
+	this->buildRobot();
+	return;
+}
+
+void PanTilt_HTM::setTCPCoord(cv::Point3d){
+	throw string("NYI");
+}
+
+void PanTilt_HTM::buildRobot(){
+	if(this->T_1_0_ != NULL) delete this->T_1_0_;
+	if(this->T_2_1_ != NULL) delete this->T_2_1_;
+	if(this->T_3_2_ != NULL) delete this->T_3_2_;
+	if(this->T_4_3_ != NULL) delete this->T_4_3_;
+
+
+	// define matrices
+	T_1_0_ = factory('Z',-jValue_[0],0,0,0);
+	T_2_1_ = factory('X',jValue_[1],0,0,0);
+	T_3_2_ = factory('Z',-jValue_[2],0,linkLenght_[2],0);
+	T_4_3_ = factory('X',jValue_[3],linkLenght_[3],0,0);
+
+	// calculate final matrices
+	cv::Mat T_2_0 = T_1_0_->current() * T_2_1_->current();
+	cv::Mat T_3_0 = T_2_0  * T_3_2_->current();
+	forwardKin_ = T_3_0  * T_4_3_->current();
+
+	// read joint coordinates (incl. TCP)
+	// base
+	jCoord_[0] = cv::Point3d(0,0,0);
+
+	//
+	jCoord_[1] = cv::Point3d(T_1_0_->current().at<float>(0,3),
+							 T_1_0_->current().at<float>(1,3),
+							 T_1_0_->current().at<float>(2,3));
+
+	//
+	jCoord_[2] = cv::Point3d(T_2_0.at<float>(0,3),
+							 T_2_0.at<float>(1,3),
+							 T_2_0.at<float>(2,3));
+
+	//
+	jCoord_[3] = cv::Point3d(T_3_0.at<float>(0,3),
+							 T_3_0.at<float>(1,3),
+							 T_3_0.at<float>(2,3));
+
+	//
+	jCoord_[4] = cv::Point3d(forwardKin_.at<float>(0,3),
+							 forwardKin_.at<float>(1,3),
+							 forwardKin_.at<float>(2,3));
+
+	return;
+}
+
+
+

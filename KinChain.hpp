@@ -19,14 +19,14 @@
 
 class IKinChain{
 public:
-
-	virtual int  getNmbJoints()                = 0;
-	virtual int  getNmbRobotPoints()           = 0;
-	virtual void getRobotCoord(cv::Point3d[])  = 0;
-	virtual void getJointValues(float[])       = 0;
-	virtual void setJointValues(const float[]) = 0;
-	virtual void setTCPCoord(cv::Point3d)      = 0;
-	virtual void buildRobot()                  = 0;
+	virtual 		~IKinChain(){};
+	virtual int     getNmbJoints()                = 0;
+	virtual int     getNmbRobotPoints()           = 0;
+	virtual void    getRobotCoord(cv::Point3d[])  = 0;
+	virtual void    getJointValues(float[])       = 0;
+	virtual void    setJointValues(const float[]) = 0;
+	virtual void    setTCPCoord(cv::Point3d)      = 0;
+	virtual void    buildRobot()                  = 0;
 };
 
 
@@ -46,11 +46,21 @@ public:
 
 
 
-
 class PanTilt : public IKinChain{
 public:
-	PanTilt();
-	~PanTilt();
+	virtual ~PanTilt(){return;};
+	virtual cv::Mat getForwardKin()         = 0;
+	virtual cv::Mat getInvertedForwardKin() = 0;
+	virtual unsigned int getPanIdx()        = 0;
+	virtual unsigned int getTiltIdx()       = 0;
+};
+
+
+
+class PanTilt_DH : public PanTilt{
+public:
+	PanTilt_DH();
+	~PanTilt_DH();
 	int  getNmbJoints();
 	int  getNmbRobotPoints();
 	void getRobotCoord(cv::Point3d[]);
@@ -59,11 +69,12 @@ public:
 	void setTCPCoord(cv::Point3d);
 	void buildRobot();
 
+	unsigned int getPanIdx();
+	unsigned int getTiltIdx();
+
 	cv::Mat getForwardKin();
 	cv::Mat getInvertedForwardKin();
 
-	static const int PAN_IDX_ = 0;
-	static const int TILT_IDX_ = 1;
 
 protected:
 	HTM3dDH T_1_0_;
@@ -84,9 +95,63 @@ protected:
 };
 
 
+
+class PanTilt_HTM : public PanTilt{
+public:
+	PanTilt_HTM();
+	~PanTilt_HTM();
+	int  getNmbJoints();
+	int  getNmbRobotPoints();
+	void getRobotCoord(cv::Point3d[]);
+	void getJointValues(float[]);
+	void setJointValues(const float[]);
+	void setTCPCoord(cv::Point3d);
+	void buildRobot();
+
+	cv::Mat getForwardKin();
+	cv::Mat getInvertedForwardKin();
+
+	unsigned int getPanIdx();
+	unsigned int getTiltIdx();
+
+
+protected:
+	static const int nmbJoints_ = 4;
+	static const int nmbLinks_  = 4;
+	static const int nmbRobotPoints_ = 5; // position base, joints and TCP
+
+	float linkLenght_[nmbLinks_];  // links
+	float jValue_[nmbJoints_]; // rotations joints values
+	cv::Point3d jCoord_[nmbRobotPoints_];
+
+
+	IHTM *T_1_0_ = NULL;
+	IHTM *T_2_1_ = NULL;
+	IHTM *T_3_2_ = NULL;
+	IHTM *T_4_3_ = NULL;
+
+	cv::Mat forwardKin_;
+	cv::Mat invForwardKin_;
+
+	float panValueRad_, tiltValueRad_, link0_, link1_;
+
+};
+
+
 class PanTiltActiveVisionSystem : public IPanTiltActiveVisionSystem{
 public:
-			PanTiltActiveVisionSystem(int width = 640, int height = 480, int FOV = 90);
+			/**
+			 *
+			 *  Constructor.
+			 *
+			 *	\p W int given in number (of pixel) horizontal (width) resolution of the camera
+			 *	\p H int given in number (of pixel) vertical (height)  resolution of the camera
+			 *	\p FOV int given in degree  vertical and horizontal field of view of the camera
+			 *	\p c char specifies the implementation of the pan-tilt system 'D' uses DH-parameter based implementation
+			 *	      'H' is the standard HTMs are used for implementing the kinematic chain of the pan-tilt system.
+			 *
+			 */
+			PanTiltActiveVisionSystem(int width = 640, int height = 480, int FOV = 90,  char c = 'D');
 			~PanTiltActiveVisionSystem();
 	void    setPan(float angleRad);
 	void    setTilt(float angleRad);
@@ -100,9 +165,6 @@ public:
 	void    getPixelData(cv::Point3d p, int pixel[2]);
 
 protected:
-
-
-
 
 	PanTilt *panTilt_ = NULL;
 	Cam     *cam_ = NULL;

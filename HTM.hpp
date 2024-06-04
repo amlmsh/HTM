@@ -52,6 +52,7 @@
  */
 class IHTM{
 public:
+	virtual ~IHTM(){};
 
 	/**
 	 *

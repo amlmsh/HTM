@@ -7,6 +7,7 @@
 #include <iostream>
 
 
+
 #define PI 3.14159
 
 #define wW 800
@@ -31,6 +32,8 @@ cv::Point3d *robotPoints;
 
 void MyFilledCircle( cv::Mat img, cv::Point3d center, cv::Scalar c );
 void MyLine( cv::Mat img, cv::Point3d start, cv::Point3d end, cv::Scalar c );
+
+
 
 int main(){
 
@@ -110,3 +113,5 @@ void MyLine( cv::Mat img, cv::Point3d start, cv::Point3d end, cv::Scalar c )
  cv::line( img, p2dStart, p2dEnd, c, thickness, lineType );
  return;
 }
+
+

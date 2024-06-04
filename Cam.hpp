@@ -45,6 +45,7 @@
  */
 class ICam{
 public:
+	virtual         ~ICam(){};
 	virtual void    setHeight(int h) = 0;
 	virtual void    setWidth(int w) = 0;
 	virtual void    setFOV(int angle)  = 0;

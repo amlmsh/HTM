@@ -28,6 +28,8 @@ int main(){
 	namedWindow("Cam", cv::WINDOW_AUTOSIZE); // Create Window
 	cv::Mat src = cv::Mat::zeros(c.getHeight(),c.getWidth(),CV_8UC3);
 
+    z = 0;
+    z += 0;
 	x = 1.0;
 	for(y=-3.14; y < 3.14; y=y+0.1){
 		z = y;

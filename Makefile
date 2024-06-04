@@ -30,7 +30,7 @@ Test_HTM.o:	Test_HTM.cpp HTM.o KinChain.o
 	$(CXX) -c $(CXXFLAGS) Test_HTM.cpp
 
 Test_HTM:	Test_HTM.o HTM.o KinChain.o Cam.o
-	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o Cam.o  $(LFLAGS)
+	$(CXX) -o Test_HTM Test_HTM.o HTM.o KinChain.o Cam.o $(LFLAGS)
 
 
 Test_Cam.o:	Test_Cam.cpp Cam.o 

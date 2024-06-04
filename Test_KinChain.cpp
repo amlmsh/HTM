@@ -17,10 +17,10 @@
 
 using namespace std;
 
-void Test_PanTilt();
-void Test_PanTiltActiveVis();
-void Test_PanTiltActiveVis1();
-void Test_PanTiltActiveVis2();
+void Test_PanTilt(char c);
+void Test_PanTiltActiveVis(char c);
+void Test_PanTiltActiveVis1(char c);
+void Test_PanTiltActiveVis2(char c);
 
 
 static void on_trackbarVis2CamA_Pan( int, void* );
@@ -33,19 +33,28 @@ cv::Mat src = src.zeros(camH, camW, CV_8UC3 );;
 
 
 int main(){
+	char c;
 
-	//Test_PanTilt();
-	//Test_PanTiltActiveVis();
-	//Test_PanTiltActiveVis1();
-	Test_PanTiltActiveVis2();
+	c = 'H';
+
+	try{
+		//Test_PanTilt(c);
+		Test_PanTiltActiveVis(c);
+		//Test_PanTiltActiveVis1(c);
+		//Test_PanTiltActiveVis2(c);
+	}catch(string msg){
+		std::cout << "Error: " << msg;
+	}catch(...){
+		std::cout << "Error: unknown error.";
+	}
 
 	return 0;
 }
 
 
-void Test_PanTiltActiveVis2(){
+void Test_PanTiltActiveVis2(char c){
 
-	PanTiltActiveVisionSystem pt(camW,camH,90);
+	PanTiltActiveVisionSystem pt(camW,camH,90, c);
 
 	int pan_slider  = 180;
 	int tilt_slider = 180;
@@ -108,28 +117,36 @@ static void on_trackbarVis2CamA_Tilt( int newValue, void* panTiltActVis){
 
 
 
-void Test_PanTilt(){
+void Test_PanTilt(char c){
 	float j[2];
 	cv::Point3d p[3];
+	PanTilt *pt;
 
-	PanTilt pt;
+
+	if(c == 'D'){
+		PanTilt_DH ptDH;
+		pt = & ptDH;
+	}else{
+		PanTilt_HTM ptHTM;
+		pt = & ptHTM;
+	}
 
 
 	do{
 		std::cout << "pan :"; std::cin >> j[0];
 		std::cout << "tilt:"; std::cin >> j[1];
-		pt.setJointValues(j);
-		pt.getRobotCoord(p);
+		pt->setJointValues(j);
+		pt->getRobotCoord(p);
 		cout << "TCP: " <<p[2] << endl;
-		cout << pt.getForwardKin() << endl;
+		cout << pt->getForwardKin() << endl;
 	}while(1);
 
 	return;
 }
 
-void Test_PanTiltActiveVis1(){
+void Test_PanTiltActiveVis1(char c){
 	// object (point) is fixed, camera moves
-	PanTiltActiveVisionSystem ptActVis(1200,1200,120);
+	PanTiltActiveVisionSystem ptActVis(640,480,120,c);
 
 	float p,t;
 	int pixel[2];
@@ -182,15 +199,15 @@ void Test_PanTiltActiveVis1(){
 }
 
 
-void Test_PanTiltActiveVis(){
+void Test_PanTiltActiveVis(char c){
 
 	// camera is fixed, objects (points) are located at different places
-	PanTiltActiveVisionSystem ptActVis;
+	PanTiltActiveVisionSystem ptActVis(640,480,120,c);
 
 	int pixel[2];
 	cv::Point3d v;
-	v.x = 3;
-	v.y = 0;
+	v.x = 30;
+	v.y = 1;
 	v.z = 0;
 
 
